@@ -172,13 +172,13 @@
 }
 - (NSString *)originalNormalImageName {
     if (!_originalNormalImageName) {
-        _originalNormalImageName = @"hx_original_normal";
+        _originalNormalImageName = @"circleNormal";
     }
     return _originalNormalImageName;
 }
 - (NSString *)originalSelectedImageName {
     if (!_originalSelectedImageName) {
-        _originalSelectedImageName = @"hx_original_selected";
+        _originalSelectedImageName = @"circleSelected";
     }
     return _originalSelectedImageName;
 }
@@ -246,8 +246,8 @@
     
     // 原图按钮设置
     self.changeOriginalTinColor = NO;
-    self.originalNormalImageName = @"hx_original_normal_wx";
-    self.originalSelectedImageName = @"hx_original_selected_wx";
+    self.originalNormalImageName = @"circleNormal";
+    self.originalSelectedImageName = @"circleSelected";
 
     // 颜色设置
     UIColor *wxColor = [UIColor hx_colorWithHexStr:@"#07C160"];

@@ -50,6 +50,9 @@ HXVideoEditViewControllerDelegate,
 HX_PhotoEditViewControllerDelegate
 //PHPhotoLibraryChangeObserver
 >
+@property (assign, nonatomic) NSInteger selectedIndex;
+@property (strong, nonatomic) NSMutableArray *selectedIndexArray;
+
 @property (strong, nonatomic) UICollectionViewFlowLayout *flowLayout;
 @property (strong, nonatomic) UICollectionView *collectionView;
 
@@ -165,6 +168,7 @@ HX_PhotoEditViewControllerDelegate
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.selectedIndexArray = [NSMutableArray arrayWithCapacity:0];
     self.assetDidChanged = NO;
 //    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
     self.firstOn = YES;
@@ -286,7 +290,7 @@ HX_PhotoEditViewControllerDelegate
     }
     self.view.backgroundColor = backgroundColor;
     self.collectionView.backgroundColor = backgroundColor;
-    [self.navigationController.navigationBar setTintColor:themeColor];
+    [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
     
     self.navigationController.navigationBar.barTintColor = navBarBackgroudColor;
     self.navigationController.navigationBar.barStyle = self.manager.configuration.navBarStyle;
@@ -351,8 +355,8 @@ HX_PhotoEditViewControllerDelegate
         rightMargin = 35;
         width = [UIScreen mainScreen].bounds.size.width - 70;
     }
-    CGFloat itemWidth = (width - (lineCount - 1)) / lineCount;
-    CGFloat itemHeight = itemWidth;
+    CGFloat itemWidth = 89;//(width - (lineCount - 1)) / lineCount;
+    CGFloat itemHeight = 89;//itemWidth;
     self.flowLayout.itemSize = CGSizeMake(itemWidth, itemHeight);
     CGFloat bottomViewY = height - 50 - bottomMargin;
     
@@ -595,7 +599,7 @@ HX_PhotoEditViewControllerDelegate
 }
 - (void)collectionViewReloadFinishedWithFirstSelectModel:(HXPhotoModel *)firstSelectModel {
     if (!self.manager.configuration.singleSelected) {
-        self.bottomView.selectCount = self.manager.selectedArray.count;
+        self.bottomView.selectCount = 0;
     }
     NSIndexPath *scrollIndexPath;
     UICollectionViewScrollPosition position = UICollectionViewScrollPositionNone;
@@ -761,7 +765,8 @@ HX_PhotoEditViewControllerDelegate
         cell.delegate = self;
         cell.darkSelectBgColor = self.manager.configuration.cellDarkSelectBgColor;
         cell.darkSelectedTitleColor = self.manager.configuration.cellDarkSelectTitleColor;
-        
+        cell.selectBtn.selected = _selectedIndex == indexPath.row;
+
         UIColor *cellSelectedTitleColor = self.manager.configuration.cellSelectedTitleColor;
         UIColor *selectedTitleColor = self.manager.configuration.selectedTitleColor;
         UIColor *cellSelectedBgColor = self.manager.configuration.cellSelectedBgColor;
@@ -770,11 +775,12 @@ HX_PhotoEditViewControllerDelegate
         }else if (selectedTitleColor) {
             cell.selectedTitleColor = selectedTitleColor;
         }
-        if (cellSelectedBgColor) {
-            cell.selectBgColor = cellSelectedBgColor;
-        }else {
-            cell.selectBgColor = self.manager.configuration.themeColor;
-        }
+//        if (cellSelectedBgColor) {
+//            cell.selectBgColor = cellSelectedBgColor;
+//        }else {
+//            cell.selectBgColor = self.manager.configuration.themeColor;
+//        }
+        cell.selectBgColor = [UIColor whiteColor];
         if (self.cellCanSetModel) {
             [cell setModel:model clearImage:NO];
             [cell setModelDataWithHighQuality:NO completion:nil];
@@ -790,6 +796,36 @@ HX_PhotoEditViewControllerDelegate
     if (self.navigationController.topViewController != self) {
         return;
     }
+    if (_selectedIndex == indexPath.row) {
+        _selectedIndex = -1;
+    } else {
+        _selectedIndex = indexPath.row;
+        if (![_selectedIndexArray containsObject:indexPath]) {
+            [_selectedIndexArray addObject: indexPath];
+        }
+    }
+//    HXPhotoViewCell *cell = (HXPhotoViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+//    cell.selectBtn.selected = _selectedIndex == indexPath.row;
+
+    for (NSIndexPath *path in _selectedIndexArray) {
+        if (path.row != _selectedIndex) {
+            HXPhotoViewCell *cell = (HXPhotoViewCell *)[collectionView cellForItemAtIndexPath:path];
+            cell.selectBtn.selected = true;
+            [self.manager beforeSelectedListdeletePhotoModel:cell.model];
+            cell.model.selectIndexStr = @"";
+            [self photoViewCell:cell didSelectBtn:cell.selectBtn];
+        } else {
+            HXPhotoViewCell *cell = (HXPhotoViewCell *)[collectionView cellForItemAtIndexPath:path];
+            cell.selectBtn.selected = false;
+            [self photoViewCell:cell didSelectBtn:cell.selectBtn];
+        }
+    }
+//    visibleCell.model.selectIndexStr = @"";
+//    [self photoViewCell:cell didSelectBtn:cell.selectBtn];
+
+    [collectionView reloadItemsAtIndexPaths:_selectedIndexArray];
+    return;
+    
     HXPhotoModel *model = self.allArray[indexPath.item];
     if (model.type == HXPhotoModelMediaTypeCamera) {
         if(![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
@@ -1151,60 +1187,74 @@ HX_PhotoEditViewControllerDelegate
         if (str) {
             if ([str isEqualToString:@"selectVideoBeyondTheLimitTimeAutoEdit"]) {
                 [self jumpVideoEditWithModel:cell.model];
+                return;
             }else {
-                [self.view hx_showImageHUDText:str];
+//                for (HXPhotoViewCell *visibleCell in _collectionView.visibleCells) {
+//
+//                    [self.manager beforeSelectedListdeletePhotoModel:visibleCell.model];
+//                    visibleCell.model.selectIndexStr = @"";
+//                    if (cell.selectBtn.selected) {
+//                        cell.selectBtn.selected = NO;
+//                        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:[self dateItem:visibleCell.model] inSection:0];
+//
+//                        [self.collectionView reloadItemsAtIndexPaths: @[indexPath]];
+//                    }
+////                    if (!visibleCell.selectMaskLayer.hidden) {
+////                        visibleCell.selectMaskLayer.hidden = YES;
+////                    }
+//                }
+//                [self.view hx_showImageHUDText:str];
             }
-            return;
         }
         if (cell.model.type != HXPhotoModelMediaTypeCameraVideo && cell.model.type != HXPhotoModelMediaTypeCameraPhoto) {
             cell.model.thumbPhoto = cell.imageView.image;
         }
         [self.manager beforeSelectedListAddPhotoModel:cell.model];
-        cell.selectMaskLayer.hidden = NO;
-        selectBtn.selected = YES;
-        [selectBtn setTitle:cell.model.selectIndexStr forState:UIControlStateSelected];
-        CAKeyframeAnimation *anim = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-        anim.duration = 0.25;
-        anim.values = @[@(1.2),@(0.8),@(1.1),@(0.9),@(1.0)];
-        [selectBtn.layer addAnimation:anim forKey:@""];
+//        cell.selectMaskLayer.hidden = NO;
+//        selectBtn.selected = YES;
+////        [selectBtn setTitle:cell.model.selectIndexStr forState:UIControlStateSelected];
+//        CAKeyframeAnimation *anim = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+//        anim.duration = 0.25;
+//        anim.values = @[@(1.2),@(0.8),@(1.1),@(0.9),@(1.0)];
+//        [selectBtn.layer addAnimation:anim forKey:@""];
     }
     
     NSMutableArray *indexPathList = [NSMutableArray array];
-    if (!selectBtn.selected) {
-        NSInteger index = 0;
-        for (HXPhotoModel *model in [self.manager selectedArray]) {
-            model.selectIndexStr = [NSString stringWithFormat:@"%ld",index + 1];
-            if (model.currentAlbumIndex == self.albumModel.index) {
-                if (model.dateCellIsVisible) {
-                    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:[self dateItem:model] inSection:0];
-                    [indexPathList addObject:indexPath];
-                }
-            }
-            index++;
-        }
-//        if (indexPathList.count > 0) {
+//    if (!selectBtn.selected) {
+//        NSInteger index = 0;
+//        for (HXPhotoModel *model in [self.manager selectedArray]) {
+//            model.selectIndexStr = [NSString stringWithFormat:@"%ld",index + 1];
+//            if (model.currentAlbumIndex == self.albumModel.index) {
+//                if (model.dateCellIsVisible) {
+//                    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:[self dateItem:model] inSection:0];
+//                    [indexPathList addObject:indexPath];
+//                }
+//            }
+//            index++;
+//        }
+////        if (indexPathList.count > 0) {
+////            [self.collectionView reloadItemsAtIndexPaths:indexPathList];
+////        }
+//    }
+    
+//    if (self.manager.videoSelectedType == HXPhotoManagerVideoSelectedTypeSingle) {
+//        for (UICollectionViewCell *tempCell in self.collectionView.visibleCells) {
+//            if ([tempCell isKindOfClass:[HXPhotoViewCell class]]) {
+//                if ([(HXPhotoViewCell *)tempCell model].subType == HXPhotoModelMediaSubTypeVideo) {
+//                    [indexPathList addObject:[self.collectionView indexPathForCell:tempCell]];
+//                }
+//            }
+//        }
+//        if (indexPathList.count) {
 //            [self.collectionView reloadItemsAtIndexPaths:indexPathList];
 //        }
-    }
-    
-    if (self.manager.videoSelectedType == HXPhotoManagerVideoSelectedTypeSingle) {
-        for (UICollectionViewCell *tempCell in self.collectionView.visibleCells) {
-            if ([tempCell isKindOfClass:[HXPhotoViewCell class]]) {
-                if ([(HXPhotoViewCell *)tempCell model].subType == HXPhotoModelMediaSubTypeVideo) {
-                    [indexPathList addObject:[self.collectionView indexPathForCell:tempCell]];
-                }
-            }
-        }
-        if (indexPathList.count) {
-            [self.collectionView reloadItemsAtIndexPaths:indexPathList];
-        }
-    }else {
-        if (!selectBtn.selected) {
-            if (indexPathList.count) {
-                [self.collectionView reloadItemsAtIndexPaths:indexPathList];
-            }
-        }
-    }
+//    }else {
+//        if (!selectBtn.selected) {
+//            if (indexPathList.count) {
+//                [self.collectionView reloadItemsAtIndexPaths:indexPathList];
+//            }
+//        }
+//    }
     
     self.bottomView.selectCount = [self.manager selectedCount];
     if ([self.delegate respondsToSelector:@selector(photoViewControllerDidChangeSelect:selected:)]) {
@@ -1741,9 +1791,9 @@ HX_PhotoEditViewControllerDelegate
 - (UICollectionViewFlowLayout *)flowLayout {
     if (!_flowLayout) {
         _flowLayout = [[UICollectionViewFlowLayout alloc] init];
-        _flowLayout.minimumLineSpacing = 1;
-        _flowLayout.minimumInteritemSpacing = 1;
-        _flowLayout.sectionInset = UIEdgeInsetsMake(0.5, 0, 0.5, 0);
+        _flowLayout.minimumLineSpacing = 6;
+        _flowLayout.minimumInteritemSpacing = 6;
+//        _flowLayout.sectionInset = UIEdgeInsetsMake(0.5, 0, 0.5, 0);
     }
     return _flowLayout;
 }
@@ -1941,7 +1991,6 @@ HX_PhotoEditViewControllerDelegate
 @property (assign, nonatomic) PHImageRequestID iCloudRequestID;
 @property (strong, nonatomic) UILabel *stateLb;
 @property (strong, nonatomic) CAGradientLayer *bottomMaskLayer;
-@property (strong, nonatomic) UIButton *selectBtn;
 @property (strong, nonatomic) UIImageView *iCloudIcon;
 @property (strong, nonatomic) CALayer *iCloudMaskLayer;
 @property (strong, nonatomic) HXCircleProgressView *progressView;
@@ -1958,7 +2007,7 @@ HX_PhotoEditViewControllerDelegate
 #ifdef __IPHONE_13_0
     if (@available(iOS 13.0, *)) {
         if ([self.traitCollection hasDifferentColorAppearanceComparedToTraitCollection:previousTraitCollection]) {
-            self.selectMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5].CGColor;
+//            self.selectMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5].CGColor;
 
             UIColor *cellSelectedTitleColor;
             UIColor *cellSelectedBgColor;
@@ -1969,12 +2018,13 @@ HX_PhotoEditViewControllerDelegate
                 cellSelectedTitleColor = self.selectedTitleColor;
                 cellSelectedBgColor = self.selectBgColor;
             }
+
             if ([cellSelectedBgColor isEqual:[UIColor whiteColor]] && !cellSelectedTitleColor) {
                 [self.selectBtn setTitleColor:[UIColor blackColor] forState:UIControlStateSelected];
             }else {
                 [self.selectBtn setTitleColor:cellSelectedTitleColor forState:UIControlStateSelected];
             }
-            self.selectBtn.tintColor = cellSelectedBgColor;
+//            self.selectBtn.tintColor = cellSelectedBgColor;
         }
     }
 #endif
@@ -2194,8 +2244,9 @@ HX_PhotoEditViewControllerDelegate
         }
     }
     self.selectMaskLayer.hidden = !model.selected;
-    self.selectBtn.selected = model.selected;
-    [self.selectBtn setTitle:model.selectIndexStr forState:UIControlStateSelected];
+//    self.selectBtn.selected = model.selected;
+//    [self.selectBtn setImage:[UIImage imageNamed:@"circleSelected"] forState:UIControlStateSelected];
+//    [self.selectBtn setTitle:model.selectIndexStr forState:UIControlStateSelected];
     
     self.iCloudIcon.hidden = !model.isICloud;
     self.iCloudMaskLayer.hidden = !model.isICloud;
@@ -2243,7 +2294,7 @@ HX_PhotoEditViewControllerDelegate
     if ([HXPhotoCommon photoCommon].isDark) {
         selectBgColor = self.darkSelectBgColor;
     }
-    self.selectBtn.tintColor = selectBgColor;
+//    self.selectBtn.tintColor = selectBgColor;
     if ([selectBgColor isEqual:[UIColor whiteColor]] && !self.selectedTitleColor) {
         [self.selectBtn setTitleColor:[UIColor blackColor] forState:UIControlStateSelected];
     }
@@ -2374,15 +2425,15 @@ HX_PhotoEditViewControllerDelegate
     }
 }
 - (void)didSelectClick:(UIButton *)button {
-    if (self.model.type == HXPhotoModelMediaTypeCamera) {
-        return;
-    }
-    if (self.model.isICloud) {
-        return;
-    }
-    if ([self.delegate respondsToSelector:@selector(photoViewCell:didSelectBtn:)]) {
-        [self.delegate photoViewCell:self didSelectBtn:button];
-    }
+//    if (self.model.type == HXPhotoModelMediaTypeCamera) {
+//        return;
+//    }
+//    if (self.model.isICloud) {
+//        return;
+//    }
+//    if ([self.delegate respondsToSelector:@selector(photoViewCell:didSelectBtn:)]) {
+//        [self.delegate photoViewCell:self didSelectBtn:button];
+//    }
 }
 - (void)setHighlighted:(BOOL)highlighted {
     [super setHighlighted:highlighted];
@@ -2394,8 +2445,8 @@ HX_PhotoEditViewControllerDelegate
     self.maskView.frame = self.bounds;
     self.stateLb.frame = CGRectMake(0, self.hx_h - 18, self.hx_w - 7, 18);
     self.bottomMaskLayer.frame = CGRectMake(0, self.hx_h - 25, self.hx_w, 27);
-    self.selectBtn.hx_x = self.hx_w - self.selectBtn.hx_w - 5;
-    self.selectBtn.hx_y = 5;
+    self.selectBtn.hx_x = self.hx_w - self.selectBtn.hx_w - 12;
+    self.selectBtn.hx_y = 12;
     self.selectMaskLayer.frame = self.bounds;
     self.iCloudMaskLayer.frame = self.bounds;
     self.iCloudIcon.hx_x = self.hx_w - 3 - self.iCloudIcon.hx_w;
@@ -2417,7 +2468,7 @@ HX_PhotoEditViewControllerDelegate
 - (UIView *)highlightMaskView {
     if (!_highlightMaskView) {
         _highlightMaskView = [[UIView alloc] initWithFrame:self.bounds];
-        _highlightMaskView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
+//        _highlightMaskView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
         _highlightMaskView.hidden = YES;
     }
     return _highlightMaskView;
@@ -2477,7 +2528,7 @@ HX_PhotoEditViewControllerDelegate
     if (!_selectMaskLayer) {
         _selectMaskLayer = [CALayer layer];
         _selectMaskLayer.hidden = YES;
-        _selectMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5].CGColor;
+//        _selectMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5].CGColor;
     }
     return _selectMaskLayer;
 }
@@ -2523,15 +2574,19 @@ HX_PhotoEditViewControllerDelegate
 - (UIButton *)selectBtn {
     if (!_selectBtn) {
         _selectBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_selectBtn setBackgroundImage:[UIImage hx_imageNamed:@"hx_compose_guide_check_box_default"] forState:UIControlStateNormal];
-        UIImage *bgImage = [[UIImage hx_imageNamed:@"hx_compose_guide_check_box_selected"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-        [_selectBtn setBackgroundImage:bgImage forState:UIControlStateSelected];
-        [_selectBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+        
+        [_selectBtn setImage:[UIImage hx_imageNamed:@"circleNormal"] forState:UIControlStateNormal];
+//        [_selectBtn setBackgroundImage:[UIImage hx_imageNamed:@"circleNormal"] forState:UIControlStateNormal];
+//        UIImage *bgImage = [[UIImage hx_imageNamed:@"circleNormal"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+//        [_selectBtn setBackgroundImage:bgImage forState:UIControlStateSelected];
+        [_selectBtn setImage:[UIImage hx_imageNamed:@"circleSelected"] forState:UIControlStateSelected];
+
+//        [_selectBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
         _selectBtn.titleLabel.font = [UIFont hx_mediumPingFangOfSize:16];
         _selectBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
-        _selectBtn.hx_size = _selectBtn.currentBackgroundImage.size;
+        _selectBtn.hx_size = CGSizeMake(22, 22);// _selectBtn.currentBackgroundImage.size;
         [_selectBtn addTarget:self action:@selector(didSelectClick:) forControlEvents:UIControlEventTouchUpInside];
-        [_selectBtn hx_setEnlargeEdgeWithTop:0 right:0 bottom:15 left:15];
+//        [_selectBtn hx_setEnlargeEdgeWithTop:0 right:0 bottom:15 left:15];
     }
     return _selectBtn;
 }
@@ -2826,7 +2881,6 @@ HX_PhotoEditViewControllerDelegate
 
 @interface HXPhotoBottomView ()
 @property (strong, nonatomic) UIButton *previewBtn;
-@property (strong, nonatomic) UIButton *doneBtn;
 @property (strong, nonatomic) UIButton *editBtn;
 @property (strong, nonatomic) UIActivityIndicatorView *loadingView;
 @property (strong, nonatomic) UIColor *barTintColor;
@@ -2853,7 +2907,7 @@ HX_PhotoEditViewControllerDelegate
 }
 - (void)setupUI {
     [self addSubview:self.bgView];
-    [self addSubview:self.previewBtn];
+//    [self addSubview:self.previewBtn];
     [self addSubview:self.originalBtn];
     [self addSubview:self.doneBtn];
     [self addSubview:self.editBtn];
@@ -2916,12 +2970,12 @@ HX_PhotoEditViewControllerDelegate
     [self.editBtn setTitleColor:[themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
     
     if ([themeColor isEqual:[UIColor whiteColor]]) {
-        [self.doneBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [self.doneBtn setTitleColor:[[UIColor blackColor] colorWithAlphaComponent:0.3] forState:UIControlStateDisabled];
+        [self.doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//        [self.doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.3] forState:UIControlStateDisabled];
     }
     if (selectedTitleColor) {
-        [self.doneBtn setTitleColor:selectedTitleColor forState:UIControlStateNormal];
-        [self.doneBtn setTitleColor:[selectedTitleColor colorWithAlphaComponent:0.3] forState:UIControlStateDisabled];
+        [self.doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//        [self.doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.3] forState:UIControlStateDisabled];
     }
     if (self.manager.configuration.showOriginalBytesLoading) {
         self.loadingView.color = themeColor;
@@ -2933,29 +2987,31 @@ HX_PhotoEditViewControllerDelegate
         self.previewBtn.enabled = NO;
         self.doneBtn.enabled = NO;
         [self.doneBtn setTitle:[NSBundle hx_localizedStringForKey:@"完成"] forState:UIControlStateNormal];
+        self.doneBtn.titleLabel.font = [UIFont fontWithName:@"PingFangSC-Medium" size:16];
     }else {
+
         self.previewBtn.enabled = YES;
         self.doneBtn.enabled = YES;
         if (self.manager.configuration.doneBtnShowDetail) {
             if (!self.manager.configuration.selectTogether) {
                 if (self.manager.selectedPhotoCount > 0) {
                     NSInteger maxCount = self.manager.configuration.photoMaxNum > 0 ? self.manager.configuration.photoMaxNum : self.manager.configuration.maxNum;
-                    [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount,(long)maxCount] forState:UIControlStateNormal];
+//                    [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount,(long)maxCount] forState:UIControlStateNormal];
                 }else {
                     NSInteger maxCount = self.manager.configuration.videoMaxNum > 0 ? self.manager.configuration.videoMaxNum : self.manager.configuration.maxNum;
-                    [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount,(long)maxCount] forState:UIControlStateNormal];
+//                    [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount,(long)maxCount] forState:UIControlStateNormal];
                 }
             }else {
-                [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%lu)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount,(unsigned long)self.manager.configuration.maxNum] forState:UIControlStateNormal];
+//                [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%lu)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount,(unsigned long)self.manager.configuration.maxNum] forState:UIControlStateNormal];
             }
         }else {
-            [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount] forState:UIControlStateNormal];
+//            [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld)",[NSBundle hx_localizedStringForKey:@"完成"],(long)selectCount] forState:UIControlStateNormal];
         }
     }
     UIColor *themeColor = self.manager.configuration.bottomDoneBtnBgColor ?: self.manager.configuration.themeColor;
     UIColor *doneBtnDarkBgColor = self.manager.configuration.bottomDoneBtnDarkBgColor ?: [UIColor colorWithRed:0.2 green:0.2 blue:0.2 alpha:1];
-    UIColor *doneBtnBgColor = [HXPhotoCommon photoCommon].isDark ? doneBtnDarkBgColor : themeColor;
-    UIColor *doneBtnEnabledBgColor = self.manager.configuration.bottomDoneBtnEnabledBgColor ?: [doneBtnBgColor colorWithAlphaComponent:0.5];
+    UIColor *doneBtnBgColor = [UIColor colorWithRed:123/255.0 green:196/255.0 blue:55/255.0 alpha:1];//[HXPhotoCommon photoCommon].isDark ? doneBtnDarkBgColor : themeColor;
+    UIColor *doneBtnEnabledBgColor = [UIColor colorWithRed:214/255.0 green:214/255.0 blue:214/255.0 alpha:1];// self.manager.configuration.bottomDoneBtnEnabledBgColor ?: [doneBtnBgColor colorWithAlphaComponent:0.5];
     self.doneBtn.backgroundColor = self.doneBtn.enabled ? doneBtnBgColor : doneBtnEnabledBgColor;
     
     if (!self.manager.configuration.selectTogether) {
@@ -3016,11 +3072,11 @@ HX_PhotoEditViewControllerDelegate
 }
 - (void)changeDoneBtnFrame {
     CGFloat width = self.doneBtn.titleLabel.hx_getTextWidth;
-    self.doneBtn.hx_w = width + 20;
+//    self.doneBtn.hx_w = width + 20;
     if (self.doneBtn.hx_w < 60) {
         self.doneBtn.hx_w = 60;
     }
-    self.doneBtn.hx_x = self.hx_w - 12 - self.doneBtn.hx_w;
+    self.doneBtn.hx_x = self.hx_w - self.doneBtn.hx_w;
 }
 - (void)updateOriginalBtnFrame {
     if (self.editBtn.hidden) {
@@ -3084,7 +3140,7 @@ HX_PhotoEditViewControllerDelegate
     self.editBtn.frame = CGRectMake(CGRectGetMaxX(self.previewBtn.frame) + 10, 0, 0, 50);
     self.editBtn.hx_w = self.editBtn.titleLabel.hx_getTextWidth;
     
-    self.doneBtn.frame = CGRectMake(0, 0, 60, 30);
+    self.doneBtn.frame = CGRectMake(0, 0, 110, 52);
     self.doneBtn.center = CGPointMake(self.doneBtn.center.x, 25);
     [self changeDoneBtnFrame];
     
@@ -3113,8 +3169,8 @@ HX_PhotoEditViewControllerDelegate
         [_doneBtn setTitle:[NSBundle hx_localizedStringForKey:@"完成"] forState:UIControlStateNormal];
         _doneBtn.titleLabel.font = [UIFont hx_mediumPingFangOfSize:16];
         [_doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [_doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-        _doneBtn.layer.cornerRadius = 3;
+//        [_doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+//        _doneBtn.layer.cornerRadius = 3;
         _doneBtn.enabled = NO;
         [_doneBtn addTarget:self action:@selector(didDoneBtnClick) forControlEvents:UIControlEventTouchUpInside];
     }

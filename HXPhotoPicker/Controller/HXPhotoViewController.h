@@ -86,6 +86,8 @@ HXCustomCameraController;
 @property (strong, nonatomic) UIColor *selectedTitleColor;
 @property (strong, nonatomic) UIColor *darkSelectBgColor;
 @property (strong, nonatomic) UIColor *darkSelectedTitleColor;
+@property (strong, nonatomic) UIButton *selectBtn;
+
 - (void)resetNetworkImage;
 - (void)cancelRequest;
 - (void)startRequestICloudAsset;
@@ -135,5 +137,6 @@ HXCustomCameraController;
 @property (assign, nonatomic) NSInteger selectCount;
 @property (strong, nonatomic) UIButton *originalBtn;
 @property (strong, nonatomic) UIToolbar *bgView;
+@property (strong, nonatomic) UIButton *doneBtn;
 - (void)requestPhotosBytes;
 @end

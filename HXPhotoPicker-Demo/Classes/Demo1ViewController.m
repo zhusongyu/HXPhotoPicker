@@ -282,7 +282,7 @@
         self.manager.configuration.navBarBackgroudColor = [UIColor redColor];
         self.manager.configuration.statusBarStyle = UIStatusBarStyleLightContent;
         self.manager.configuration.sectionHeaderTranslucent = NO;
-        self.bottomViewBgColor = [UIColor redColor];
+        self.bottomViewBgColor = [UIColor whiteColor];
         self.manager.configuration.cellSelectedBgColor = [UIColor redColor];
         self.manager.configuration.selectedTitleColor = [UIColor redColor];
 //        self.manager.configuration.sectionHeaderSuspensionBgColor = [UIColor redColor];
@@ -301,7 +301,7 @@
         self.manager.configuration.navBarBackgroudColor = [UIColor blackColor];
         self.manager.configuration.statusBarStyle = UIStatusBarStyleLightContent;
         self.manager.configuration.sectionHeaderTranslucent = NO;
-        self.bottomViewBgColor = [UIColor blackColor];
+        self.bottomViewBgColor = [UIColor whiteColor];
         self.manager.configuration.cellSelectedBgColor = [UIColor blackColor];
         self.manager.configuration.selectedTitleColor = [UIColor blackColor];
 //        self.manager.configuration.sectionHeaderSuspensionBgColor = [UIColor blackColor];
@@ -310,7 +310,7 @@
         self.manager.configuration.navBarBackgroudColor = [UIColor orangeColor];
         self.manager.configuration.statusBarStyle = UIStatusBarStyleLightContent;
         self.manager.configuration.sectionHeaderTranslucent = NO;
-        self.bottomViewBgColor = [UIColor orangeColor];
+        self.bottomViewBgColor = [UIColor whiteColor];
         self.manager.configuration.cellSelectedBgColor = [UIColor orangeColor];
         self.manager.configuration.selectedTitleColor = [UIColor orangeColor];
 //        self.manager.configuration.sectionHeaderSuspensionBgColor = [UIColor orangeColor];
@@ -356,6 +356,7 @@
     self.manager.configuration.photoCanEdit = self.photoCanEditSwitch.on;
     self.manager.configuration.videoCanEdit = self.videoCanEditSwitch.on;
     self.manager.configuration.creationDateSort = self.createTimeSortSwitch.on;
+    self.manager.configuration.originalSelectedImageName = @"circleSelected";
     HXWeakSelf
     [self hx_presentSelectPhotoControllerWithManager:self.manager didDone:^(NSArray<HXPhotoModel *> *allList, NSArray<HXPhotoModel *> *photoList, NSArray<HXPhotoModel *> *videoList, BOOL isOriginal, UIViewController *viewController, HXPhotoManager *manager) {
         weakSelf.total.text = [NSString stringWithFormat:@"总数量：%ld   ( 照片：%ld   视频：%ld )",allList.count, photoList.count, videoList.count];

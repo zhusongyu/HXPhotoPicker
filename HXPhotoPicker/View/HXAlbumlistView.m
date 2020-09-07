@@ -35,7 +35,7 @@
     if (self) {
         self.cellCanSetModel = YES;
         self.manager = manager;
-        self.tableView.backgroundColor = [HXPhotoCommon photoCommon].isDark ? [UIColor colorWithRed:0.125 green:0.125 blue:0.125 alpha:1] : self.manager.configuration.popupTableViewBgColor;
+        self.tableView.backgroundColor = [UIColor colorWithRed:48/255.0 green:50/255.0 blue:44/255.0 alpha:1];//[HXPhotoCommon photoCommon].isDark ? [UIColor colorWithRed:0.125 green:0.125 blue:0.125 alpha:1] : self.manager.configuration.popupTableViewBgColor;
         [self addSubview:self.tableView];
     }
     return self;
@@ -216,7 +216,7 @@
         [self.contentView addSubview:self.coverView];
         [self.contentView addSubview:self.albumNameLb];
         [self.contentView addSubview:self.countLb];
-        [self.contentView addSubview:self.lineView];
+//        [self.contentView addSubview:self.lineView];
     }
     return self;
 }
@@ -224,14 +224,14 @@
     [super setHighlighted:highlighted animated:animated];
     UIColor *selectedBgColor;
     if (self.configuration.popupTableViewCellSelectColor) {
-        selectedBgColor = self.configuration.popupTableViewCellSelectColor;
+        selectedBgColor = [UIColor colorWithRed:48/255.0 green:50/255.0 blue:44/255.0 alpha:1];//self.configuration.popupTableViewCellSelectColor;
     }else {
-        selectedBgColor = [UIColor colorWithRed:0.93 green:0.93 blue:0.93 alpha:1.f];
+        selectedBgColor = [UIColor colorWithRed:48/255.0 green:50/255.0 blue:44/255.0 alpha:1];//[UIColor colorWithRed:0.93 green:0.93 blue:0.93 alpha:1.f];
     }
-    self.selectedBgView.backgroundColor = highlighted ? (self.configuration.popupTableViewCellHighlightedColor ?: selectedBgColor) : selectedBgColor;
-    if (!self.selected && self.configuration.popupTableViewCellSelectIconColor) {
-        self.selectIcon.hidden = highlighted;
-    }
+    self.selectedBgView.backgroundColor = selectedBgColor;//highlighted ? (self.configuration.popupTableViewCellHighlightedColor ?: selectedBgColor) : selectedBgColor;
+//    if (!self.selected && self.configuration.popupTableViewCellSelectIconColor) {
+//        self.selectIcon.hidden = highlighted;
+//    }
 }
 - (void)setModel:(HXAlbumModel *)model {
     _model = model;
@@ -265,7 +265,7 @@
 - (void)getAlbumImageWithCompletion:(void (^)(UIImage *image, PHAsset *asset))completion {
     NSInteger photoCount = self.model.count;
 
-    self.countLb.text = @(photoCount + self.model.cameraCount).stringValue;
+    self.countLb.text = [NSString stringWithFormat:@"(%@)", @(photoCount + self.model.cameraCount).stringValue];
     HXWeakSelf
     self.requestId = [HXPhotoModel requestThumbImageWithPHAsset:self.model.assetResult.lastObject size:CGSizeMake(self.hx_h * 1.4, self.hx_h * 1.4) completion:^(UIImage *image, PHAsset *asset) {
         if (asset == weakSelf.model.assetResult.lastObject) {
@@ -278,59 +278,70 @@
 }
 - (void)setConfiguration:(HXPhotoConfiguration *)configuration {
     _configuration = configuration;
-    if ([HXPhotoCommon photoCommon].isDark) {
-        if (configuration.popupTableViewCellSelectColor != [UIColor clearColor]) {
-            self.selectedBgView.backgroundColor = [UIColor hx_colorWithHexStr:@"#2E2F30"];
-        }
-        self.lineView.backgroundColor = [[UIColor hx_colorWithHexStr:@"#434344"] colorWithAlphaComponent:0.6];
-        self.backgroundColor = [UIColor hx_colorWithHexStr:@"#2E2F30"];
-        self.albumNameLb.textColor = [UIColor whiteColor];
-        self.countLb.textColor = [UIColor whiteColor];
-        if (configuration.popupTableViewCellSelectIconColor) {
-            self.selectIcon.tintColor = [UIColor whiteColor];
-        }
-    }else {
-        if (configuration.popupTableViewCellSelectColor) {
-            self.selectedBgView.backgroundColor = configuration.popupTableViewCellSelectColor;
-        }else {
-            self.selectedBgView.backgroundColor = [UIColor colorWithRed:0.93 green:0.93 blue:0.93 alpha:1.f];
-        }
-        if (configuration.popupTableViewCellLineColor) {
-            self.lineView.backgroundColor = configuration.popupTableViewCellLineColor;
-        }else {
-            self.lineView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.f];
-        }
-        if (configuration.popupTableViewCellBgColor) {
-            self.backgroundColor = configuration.popupTableViewCellBgColor;
-        }else {
-            self.backgroundColor = nil;
-        }
-        if (configuration.popupTableViewCellAlbumNameColor) {
-            self.albumNameLb.textColor = configuration.popupTableViewCellAlbumNameColor;
-        }else {
-            self.albumNameLb.textColor = [UIColor blackColor];
-        }
-        if (configuration.popupTableViewCellPhotoCountColor) {
-            self.countLb.textColor = configuration.popupTableViewCellPhotoCountColor;
-        }else {
-            self.countLb.textColor = [UIColor blackColor];
-        }
-        if (configuration.popupTableViewCellSelectIconColor) {
-            self.selectIcon.tintColor = configuration.popupTableViewCellSelectIconColor;
-        }else {
-            self.selectIcon.hidden = YES;;
-        }
-    }
-    if (configuration.popupTableViewCellPhotoCountFont) {
-        self.countLb.font = configuration.popupTableViewCellPhotoCountFont;
-    }else {
-        self.countLb.font = [UIFont systemFontOfSize:13];
-    }
-    if (configuration.popupTableViewCellAlbumNameFont) {
-        self.albumNameLb.font = configuration.popupTableViewCellAlbumNameFont;
-    }else {
-        self.albumNameLb.font = [UIFont systemFontOfSize:14];
-    }
+//    self.lineView.backgroundColor = [[UIColor hx_colorWithHexStr:@"#434344"] colorWithAlphaComponent:0.6];
+    self.backgroundColor = [UIColor colorWithRed:48/255.0 green:50/255.0 blue:44/255.0 alpha:1];//[UIColor hx_colorWithHexStr:@"#2E2F30"];
+    self.albumNameLb.textColor = [UIColor whiteColor];
+    self.albumNameLb.font = [UIFont fontWithName:@"PingFangSC-Medium" size:18];
+    self.countLb.textColor = [UIColor colorWithRed:153/255.0 green:153/255.0 blue:153/255.0 alpha:1];
+    self.countLb.font = [UIFont fontWithName:@"PingFangSC-Medium" size:18];
+//    self.selectIcon.tintColor = [UIColor whiteColor];
+
+//    if (configuration.popupTableViewCellSelectIconColor) {
+//        self.selectIcon.tintColor = [UIColor whiteColor];
+//    }
+//    if ([HXPhotoCommon photoCommon].isDark) {
+//        if (configuration.popupTableViewCellSelectColor != [UIColor clearColor]) {
+////            self.selectedBgView.backgroundColor = [UIColor hx_colorWithHexStr:@"#2E2F30"];
+//        }
+//        self.lineView.backgroundColor = [[UIColor hx_colorWithHexStr:@"#434344"] colorWithAlphaComponent:0.6];
+//        self.backgroundColor = [UIColor hx_colorWithHexStr:@"#2E2F30"];
+//        self.albumNameLb.textColor = [UIColor whiteColor];
+//        self.countLb.textColor = [UIColor whiteColor];
+//        if (configuration.popupTableViewCellSelectIconColor) {
+//            self.selectIcon.tintColor = [UIColor whiteColor];
+//        }
+//    }else {
+//        if (configuration.popupTableViewCellSelectColor) {
+////            self.selectedBgView.backgroundColor = configuration.popupTableViewCellSelectColor;
+//        }else {
+////            self.selectedBgView.backgroundColor = [UIColor colorWithRed:0.93 green:0.93 blue:0.93 alpha:1.f];
+//        }
+//        if (configuration.popupTableViewCellLineColor) {
+//            self.lineView.backgroundColor = configuration.popupTableViewCellLineColor;
+//        }else {
+//            self.lineView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.f];
+//        }
+//        if (configuration.popupTableViewCellBgColor) {
+//            self.backgroundColor = configuration.popupTableViewCellBgColor;
+//        }else {
+//            self.backgroundColor = nil;
+//        }
+//        if (configuration.popupTableViewCellAlbumNameColor) {
+//            self.albumNameLb.textColor = configuration.popupTableViewCellAlbumNameColor;
+//        }else {
+//            self.albumNameLb.textColor = [UIColor blackColor];
+//        }
+//        if (configuration.popupTableViewCellPhotoCountColor) {
+//            self.countLb.textColor = configuration.popupTableViewCellPhotoCountColor;
+//        }else {
+//            self.countLb.textColor = [UIColor blackColor];
+//        }
+//        if (configuration.popupTableViewCellSelectIconColor) {
+//            self.selectIcon.tintColor = configuration.popupTableViewCellSelectIconColor;
+//        }else {
+//            self.selectIcon.hidden = YES;;
+//        }
+//    }
+//    if (configuration.popupTableViewCellPhotoCountFont) {
+//        self.countLb.font = configuration.popupTableViewCellPhotoCountFont;
+//    }else {
+//        self.countLb.font = [UIFont systemFontOfSize:13];
+//    }
+//    if (configuration.popupTableViewCellAlbumNameFont) {
+//        self.albumNameLb.font = configuration.popupTableViewCellAlbumNameFont;
+//    }else {
+//        self.albumNameLb.font = [UIFont systemFontOfSize:14];
+//    }
 }
 - (void)cancelRequest {
     if (self.requestId) {
@@ -340,29 +351,29 @@
 }
 - (void)layoutSubviews {
     [super layoutSubviews];
-    self.selectedBgView.frame = self.bounds;
+//    self.selectedBgView.frame = self.bounds;
     
-    self.selectIcon.hx_x = self.hx_w - 20 - self.selectIcon.hx_w;
-    self.selectIcon.hx_centerY = self.hx_h / 2;
+//    self.selectIcon.hx_x = self.hx_w - 20 - self.selectIcon.hx_w;
+//    self.selectIcon.hx_centerY = self.hx_h / 2;
     
-    self.coverView.frame = CGRectMake(12, 5, self.hx_h - 10, self.hx_h - 10);
-    self.albumNameLb.hx_x = CGRectGetMaxX(self.coverView.frame) + 12;
-    self.albumNameLb.hx_w = self.selectIcon.hx_x - self.albumNameLb.hx_x - 10;
+    self.coverView.frame = CGRectMake(0, 0, self.hx_h, self.hx_h);
+    self.albumNameLb.hx_x = CGRectGetMaxX(self.coverView.frame) + 20;
+    self.albumNameLb.hx_w = self.albumNameLb.hx_getTextWidth;//self.selectIcon.hx_x - self.albumNameLb.hx_x - 10;
     self.albumNameLb.hx_h = self.albumNameLb.hx_getTextHeight;
     
-    self.countLb.hx_x = CGRectGetMaxX(self.coverView.frame) + 12;
+    self.countLb.hx_x = CGRectGetMaxX(self.albumNameLb.frame) + 15;
     self.countLb.hx_w = self.hx_w - self.countLb.hx_x - 10;
-    self.countLb.hx_h = 14;
+    self.countLb.hx_h = 25;
     
-    self.albumNameLb.hx_y = self.hx_h / 2 - self.albumNameLb.hx_h - 2;
-    self.countLb.hx_y = self.hx_h / 2 + 2;
+    self.albumNameLb.hx_centerY = self.hx_h / 2;
+    self.countLb.hx_centerY = self.hx_h / 2;
     
     self.lineView.frame = CGRectMake(12, self.hx_h - 0.5f, self.hx_w - 12, 0.5f);
 }
 - (UIView *)selectedBgView {
     if (!_selectedBgView) {
         _selectedBgView = [[UIView alloc] init];
-        [_selectedBgView addSubview:self.selectIcon];
+//        [_selectedBgView addSubview:self.selectIcon];
     }
     return _selectedBgView;
 }

@@ -1228,6 +1228,8 @@
             [self.selectedCameraList addObject:model];
         }
     }
+
+    [self.selectedList removeAllObjects];
     [self.selectedList addObject:model];
     model.selected = YES;
     model.selectedIndex = [self.selectedList indexOfObject:model];
