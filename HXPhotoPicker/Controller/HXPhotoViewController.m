@@ -170,6 +170,7 @@ HX_PhotoEditViewControllerDelegate
     [super viewDidLoad];
     self.selectedIndexArray = [NSMutableArray arrayWithCapacity:0];
     self.assetDidChanged = NO;
+    self.selectedIndex = -1;
 //    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
     self.firstOn = YES;
     self.cellCanSetModel = YES;
