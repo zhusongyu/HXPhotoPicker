@@ -2591,6 +2591,16 @@ HX_PhotoEditViewControllerDelegate
     }
     return _selectBtn;
 }
+    
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    CGPoint converPoint = [self.contentView convertPoint:point toView:_selectBtn];
+
+    if ([_selectBtn pointInside:converPoint withEvent:event]) {
+        return [self hitTest:CGPointMake(1, 1) withEvent:event];
+    }
+    return [super hitTest:point withEvent:event];
+}
+
 @end
 
 @interface HXPhotoViewSectionHeaderView ()
