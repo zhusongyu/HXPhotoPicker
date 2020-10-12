@@ -805,24 +805,24 @@ HX_PhotoEditViewControllerDelegate
             [_selectedIndexArray addObject: indexPath];
         }
     }
-//    HXPhotoViewCell *cell = (HXPhotoViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-//    cell.selectBtn.selected = _selectedIndex == indexPath.row;
 
     for (NSIndexPath *path in _selectedIndexArray) {
         if (path.row != _selectedIndex) {
             HXPhotoViewCell *cell = (HXPhotoViewCell *)[collectionView cellForItemAtIndexPath:path];
-            cell.selectBtn.selected = true;
-            [self.manager beforeSelectedListdeletePhotoModel:cell.model];
-            cell.model.selectIndexStr = @"";
-            [self photoViewCell:cell didSelectBtn:cell.selectBtn];
+            if (cell != nil) {
+                cell.selectBtn.selected = true;
+                [self.manager beforeSelectedListdeletePhotoModel:cell.model];
+                cell.model.selectIndexStr = @"";
+                [self photoViewCell:cell didSelectBtn:cell.selectBtn];
+            }
         } else {
             HXPhotoViewCell *cell = (HXPhotoViewCell *)[collectionView cellForItemAtIndexPath:path];
-            cell.selectBtn.selected = false;
-            [self photoViewCell:cell didSelectBtn:cell.selectBtn];
+            if (cell != nil) {
+                cell.selectBtn.selected = false;
+                [self photoViewCell:cell didSelectBtn:cell.selectBtn];
+            }
         }
     }
-//    visibleCell.model.selectIndexStr = @"";
-//    [self photoViewCell:cell didSelectBtn:cell.selectBtn];
 
     [collectionView reloadItemsAtIndexPaths:_selectedIndexArray];
     return;
