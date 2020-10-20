@@ -20,7 +20,8 @@
     return self;
 }
 
-- (void)setup { 
+- (void)setup {
+    self.shouldDismiss = YES;
     self.open3DTouchPreview = YES;
     self.openCamera = YES;
     self.lookLivePhoto = NO;

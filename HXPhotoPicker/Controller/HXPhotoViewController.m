@@ -1483,18 +1483,20 @@ HX_PhotoEditViewControllerDelegate
     [self cleanSelectedList];
     self.manager.selectPhotoing = NO;
     BOOL selectPhotoFinishDismissAnimated = self.manager.selectPhotoFinishDismissAnimated;
-    if (self.isNewEditDismiss || [self.presentedViewController isKindOfClass:[HX_PhotoEditViewController class]] || [self.presentedViewController isKindOfClass:[HXVideoEditViewController class]]) {
-        [self.presentingViewController dismissViewControllerAnimated:selectPhotoFinishDismissAnimated completion:^{
-            if ([self.delegate respondsToSelector:@selector(photoViewControllerFinishDismissCompletion:)]) {
-                [self.delegate photoViewControllerFinishDismissCompletion:self];
-            }
-        }];
-    }else {
-        [self dismissViewControllerAnimated:selectPhotoFinishDismissAnimated completion:^{
-            if ([self.delegate respondsToSelector:@selector(photoViewControllerFinishDismissCompletion:)]) {
-                [self.delegate photoViewControllerFinishDismissCompletion:self];
-            }
-        }];
+    if (self.manager.configuration.shouldDismiss) {
+        if (self.isNewEditDismiss || [self.presentedViewController isKindOfClass:[HX_PhotoEditViewController class]] || [self.presentedViewController isKindOfClass:[HXVideoEditViewController class]]) {
+            [self.presentingViewController dismissViewControllerAnimated:selectPhotoFinishDismissAnimated completion:^{
+                if ([self.delegate respondsToSelector:@selector(photoViewControllerFinishDismissCompletion:)]) {
+                    [self.delegate photoViewControllerFinishDismissCompletion:self];
+                }
+            }];
+        }else {
+            [self dismissViewControllerAnimated:selectPhotoFinishDismissAnimated completion:^{
+                if ([self.delegate respondsToSelector:@selector(photoViewControllerFinishDismissCompletion:)]) {
+                    [self.delegate photoViewControllerFinishDismissCompletion:self];
+                }
+            }];
+        }
     }
 }
 - (void)photoBottomViewDidEditBtn {

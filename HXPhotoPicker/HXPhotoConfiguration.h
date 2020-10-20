@@ -19,6 +19,10 @@ HXPhotoPreviewViewController;
 
 @interface HXPhotoConfiguration : NSObject
 
+/// 点击完成按钮后是否需要dismiss
+/// 默认YES
+@property (assign, nonatomic) BOOL shouldDismiss;
+
 /// 配置类型
 /// 一键配置UI和选择逻辑
 @property (assign, nonatomic) HXConfigurationType type;

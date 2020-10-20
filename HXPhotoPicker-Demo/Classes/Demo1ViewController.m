@@ -357,6 +357,7 @@
     self.manager.configuration.videoCanEdit = self.videoCanEditSwitch.on;
     self.manager.configuration.creationDateSort = self.createTimeSortSwitch.on;
     self.manager.configuration.originalSelectedImageName = @"circleSelected";
+//    self.manager.configuration.shouldDismiss = false;
     HXWeakSelf
     [self hx_presentSelectPhotoControllerWithManager:self.manager didDone:^(NSArray<HXPhotoModel *> *allList, NSArray<HXPhotoModel *> *photoList, NSArray<HXPhotoModel *> *videoList, BOOL isOriginal, UIViewController *viewController, HXPhotoManager *manager) {
         weakSelf.total.text = [NSString stringWithFormat:@"总数量：%ld   ( 照片：%ld   视频：%ld )",allList.count, photoList.count, videoList.count];
