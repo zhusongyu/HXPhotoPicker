@@ -1656,7 +1656,9 @@
         self.endIsOriginal = self.isOriginal;
         self.endPhotosTotalBtyes = self.photosTotalBtyes;
         
-        [self cancelBeforeSelectedList];
+        if (self.configuration.shouldDismiss) {
+            [self cancelBeforeSelectedList];
+        }
     }
 }
 - (void)cancelBeforeSelectedList {
